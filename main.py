@@ -8,6 +8,7 @@ def parse():
     parser.add_argument('-te', '--test', help='Test the saved model')
     parser.add_argument('-l', '--load', help='Load the model and train')
     parser.add_argument('-c', '--corpus', help='Test the saved model with vocabulary of the corpus')
+    parser.add_argument('-a', '--attn', help='Attention model for decoder')
     parser.add_argument('-r', '--reverse', action='store_true', help='Reverse the input sequence')
     parser.add_argument('-f', '--filter', action='store_true', help='Filter to small training data set')
     parser.add_argument('-i', '--input', action='store_true', help='Test the model by input the sentence')
@@ -16,12 +17,13 @@ def parse():
     parser.add_argument('-b', '--batch_size', type=int, default=64, help='Batch size')
     parser.add_argument('-la', '--layer', type=int, default=1, help='Number of layers in encoder and decoder')
     parser.add_argument('-hi', '--hidden', type=int, default=256, help='Hidden size in encoder and decoder')
-    parser.add_argument('-be', '--beam', type=int, default=1, help='Beam size.')
-    parser.add_argument('-k', '--topk', type=int, default=1, help='Top-K size.')
-    parser.add_argument('-p', '--nucleus', type=int, default=0, help='Nucleus (top-p) size.')
-    parser.add_argument('-v', '--ved', type=int, default=0, help='Variational encoder-decoder model.')
+    parser.add_argument('-be', '--beam', type=int, default=1, help='Beam size')
+    parser.add_argument('-k', '--topk', type=int, default=1, help='Top-K size')
+    parser.add_argument('-p', '--nucleus', type=float, default=0.0, help='Nucleus (top-p) size')
+    parser.add_argument('-v', '--ved', type=int, default=0, help='Variational encoder-decoder model')
     parser.add_argument('-s', '--save', type=int, default=500, help='Save every s iterations')
     parser.add_argument('-lr', '--learning_rate', type=float, default=0.01, help='Learning rate')
+    parser.add_argument('-cl', '--clip', type=float, default=50.0, help='Clip rate')
     parser.add_argument('-d', '--dropout', type=float, default=0.1, help='Dropout probability for rnn and dropout layers')
 
     args = parser.parse_args()
@@ -39,20 +41,22 @@ def parseFilename(filename, test=False):
 
 def run(args):
     reverse, fil, n_iteration, print_every, save_every, learning_rate, \
-        n_layers, hidden_size, batch_size, beam_size, k, p, v, inp, dropout = \
+        n_layers, hidden_size, batch_size, attn_model, beam_size, k, p, v, inp, clip, dropout = \
         args.reverse, args.filter, args.iteration, args.prints, args.save, args.learning_rate, \
-        args.layer, args.hidden, args.batch_size, args.beam, args.topk, args.nucleus, args.ved, args.input, args.dropout
+        args.layer, args.hidden, args.batch_size, args.attn, args.beam, args.topk, args.nucleus, args.ved, args.input, \
+        args.clip, args.dropout
 
     if args.train and not args.load:
         trainIters(args.train, reverse, n_iteration, learning_rate, batch_size, v,
-                    n_layers, hidden_size, print_every, save_every, dropout)
+                    n_layers, hidden_size, print_every, save_every, clip, dropout)
+
     elif args.load:
         n_layers, hidden_size, reverse = parseFilename(args.load)
         trainIters(args.train, reverse, n_iteration, learning_rate, batch_size, v,
                     n_layers, hidden_size, print_every, save_every, dropout, loadFilename=args.load)
     elif args.test:
         n_layers, hidden_size, reverse = parseFilename(args.test, True)
-        runTest(n_layers, hidden_size, reverse, args.test, beam_size, k, p, v, inp, args.corpus)
+        runTest(n_layers, hidden_size, reverse, args.test, attn_model, beam_size, k, p, v, inp, args.corpus)
 
 
 if __name__ == '__main__':
