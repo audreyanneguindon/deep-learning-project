@@ -204,7 +204,7 @@ def runTest(n_layers, hidden_size, reverse, modelFile, attn_model, beam_size, k,
     else:
         encoder = EncoderRNN(voc.num_words, hidden_size, embedding, n_layers)
         attn_model = attn_model
-        decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.n_words, n_layers)
+        decoder = LuongAttnDecoderRNN(attn_model, embedding, hidden_size, voc.num_words, n_layers)
 
     checkpoint = torch.load(modelFile)
     encoder.load_state_dict(checkpoint['en'])
