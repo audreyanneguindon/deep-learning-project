@@ -15,7 +15,7 @@ class Voc:
         self.word2index = {}
         self.word2count = {}
         self.index2word = {0: "SOS", 1: "EOS", 2:"PAD"}
-        self.n_words = 3  # Count SOS and EOS
+        self.num_words = 3  # Count SOS and EOS
 
     def addSentence(self, sentence):
         for word in sentence.split(' '):
@@ -23,10 +23,10 @@ class Voc:
 
     def addWord(self, word):
         if word not in self.word2index:
-            self.word2index[word] = self.n_words
+            self.word2index[word] = self.num_words
             self.word2count[word] = 1
-            self.index2word[self.n_words] = word
-            self.n_words += 1
+            self.index2word[self.num_words] = word
+            self.num_words += 1
         else:
             self.word2count[word] += 1
 
@@ -50,14 +50,14 @@ def readVocs(corpus, corpus_name):
     print("Reading lines...")
 
     # combine every two lines into pairs and normalize
-    with open(corpus) as f:
+    with open(corpus, 'r', encoding='iso-8859-1') as f:
         content = f.readlines()
     # import gzip
     # content = gzip.open(corpus, 'rt')
     lines = [x.strip() for x in content]
     it = iter(lines)
-    # pairs = [[normalizeString(x), normalizeString(next(it))] for x in it]
-    pairs = [[x, next(it)] for x in it]
+    pairs = [[normalizeString(x), normalizeString(next(it, 'Lines read...'))] for x in it]
+    #pairs = [[x, next(it)] for x in it]
 
     voc = Voc(corpus_name)
     return voc, pairs
@@ -79,7 +79,7 @@ def prepareData(corpus, corpus_name):
     for pair in pairs:
         voc.addSentence(pair[0])
         voc.addSentence(pair[1])
-    print("Counted words:", voc.n_words)
+    print("Counted words:", voc.num_words)
     directory = os.path.join(save_dir, 'training_data', corpus_name)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -94,6 +94,6 @@ def loadPrepareData(corpus):
         voc = torch.load(os.path.join(save_dir, 'training_data', corpus_name, 'voc.tar'))
         pairs = torch.load(os.path.join(save_dir, 'training_data', corpus_name, 'pairs.tar'))
     except FileNotFoundError:
-        print("Saved data not found, start preparing trianing data ...")
+        print("Saved data not found, start preparing training data ...")
         voc, pairs = prepareData(corpus, corpus_name)
     return voc, pairs
