@@ -5,6 +5,3 @@ Vincent Espanol, Audrey-Anne Guindon, Justine Massicotte and Jonathan Moatti
 
 This project was completed in the course Deep Learning, taught by Prof. Jian Tang, 2020.
 
-## Running the experiments
-
-WIP
